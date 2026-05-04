@@ -1,0 +1,16 @@
+gradio
+openai
+langchain
+langchain-community
+langchain-openai
+langchain-ibm
+langchain-text-splitters
+langgraph
+pydantic-settings
+docling
+ibm-watsonx-ai
+loguru
+chromadb
+rank-bm25
+pypdf
+python-dotenv
