@@ -1,33 +1,40 @@
-from pydantic_settings import BaseSettings
+from functools import lru_cache
+from typing import List
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from .constants import MAX_FILE_SIZE, MAX_TOTAL_SIZE, ALLOWED_TYPES
-import os
+
 
 class Settings(BaseSettings):
-    # Required settings
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+
     OPENAI_API_KEY: str
 
-    # Optional settings with defaults
     MAX_FILE_SIZE: int = MAX_FILE_SIZE
     MAX_TOTAL_SIZE: int = MAX_TOTAL_SIZE
-    ALLOWED_TYPES: list = ALLOWED_TYPES
+    ALLOWED_TYPES: List[str] = ALLOWED_TYPES
 
-    # Database settings
     CHROMA_DB_PATH: str = "./chroma_db"
     CHROMA_COLLECTION_NAME: str = "documents"
 
-    # Retrieval settings
     VECTOR_SEARCH_K: int = 10
-    HYBRID_RETRIEVER_WEIGHTS: list = [0.4, 0.6]
+    HYBRID_RETRIEVER_WEIGHTS: List[float] = [0.4, 0.6]
 
-    # Logging settings
     LOG_LEVEL: str = "INFO"
 
-    # New cache settings with type annotations
     CACHE_DIR: str = "document_cache"
     CACHE_EXPIRE_DAYS: int = 7
 
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
+    GRADIO_SHARE: bool = False
 
-settings = Settings()
+
+@lru_cache(maxsize=1)
+def get_settings() -> Settings:
+    try:
+        return Settings()
+    except Exception as e:
+        raise RuntimeError(
+            "Failed to load settings. Ensure your .env file exists and OPENAI_API_KEY is set."
+        ) from e
+
+
+settings = get_settings()
